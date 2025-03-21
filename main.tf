@@ -37,79 +37,19 @@ data "aws_ami" "ubuntu" {
   
 }
 
-# Grupo de seguridad para SSH
-resource "aws_security_group" "ssh_access" {
-    name = "SSH-ANYWHERE"
-    description = "SSH Access"
-    ingress  {
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+module "bastion" {
+    source = "./modules/bastion"
+    ami_id = data.aws_ami.ubuntu.id
+}
+
+module "webserver" {
+    source = "./modules/webserver"
+    ami_id = data.aws_ami.ubuntu.id
+    ssh_sg_id = module.bastion.sg_ssh_id
   
 }
 
-
-# Grupo de seguridad para Web
-resource "aws_security_group" "web_access" {
-    name = "WEB-ANYWHERE"
-    description = "HTTP and HTTPS access"
-    ingress {
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        security_groups = [ aws_security_group.ssh_access.id ]
-    }
-    ingress  {
-        from_port = 80
-        to_port = 80
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress  {
-        from_port = 443
-        to_port = 443
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-  
-}
-
-
-# Servidor Bastion
-resource "aws_instance" "bastion" {
-    security_groups = [ aws_security_group.ssh_access.name ]
-    ami = data.aws_ami.ubuntu.id
-    instance_type = "t2.medium"
-    key_name = "vockey"
-    tags = {
-        Name = "Bastion"
-    }
-}
-
-# Servidor Web
-resource "aws_instance" "webserver" {
-    security_groups = [ aws_security_group.web_access.name ]
-    ami = data.aws_ami.ubuntu.id
-    instance_type = "t2.medium"
-    key_name = "vockey"
-    user_data = file("userdata-scripts/webserver.sh")
-    tags = {
-      Name = "WebServer"
-    }
-  
+output "webserver_address" {
+    value = module.webserver.public_dns
 }
 
