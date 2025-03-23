@@ -16,40 +16,33 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "5.91.0"
     }
   }
 }
 
 provider "aws" {
-    region = "us-east-1"
+  region = var.region
 }
 
-# Id de la Imagen de Ubuntu 22.04
-data "aws_ami" "ubuntu" {
-    owners = [ "amazon" ]
-    most_recent = true
-    filter {
-      name = "name"
-      values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-    }
-  
-}
+
+
+
 
 module "bastion" {
-    source = "./modules/bastion"
-    ami_id = data.aws_ami.ubuntu.id
+  source = "./modules/bastion"
+  ami_id = data.aws_ami.ubuntu.id
 }
 
 module "webserver" {
-    source = "./modules/webserver"
-    ami_id = data.aws_ami.ubuntu.id
-    ssh_sg_id = module.bastion.sg_ssh_id
-  
+  source    = "./modules/webserver"
+  ami_id    = data.aws_ami.ubuntu.id
+  ssh_sg_id = module.bastion.sg_ssh_id
 }
 
+
 output "webserver_address" {
-    value = module.webserver.public_dns
+  value = module.webserver.public_dns
 }
 

@@ -29,16 +29,13 @@ resource "aws_security_group" "web_access" {
   
 }
 
-data "local_file" "user_data_script" {
-  filename = "${path.module}/userdata.sh"
-}
-
 # Servidor Web
 resource "aws_instance" "webserver" {
     security_groups = [ aws_security_group.web_access.name ]
     ami = var.ami_id
     instance_type = "t2.medium"
     key_name = "vockey"
+    associate_public_ip_address = true
     user_data = data.local_file.user_data_script.content
     tags = {
       Name = "WebServer"
