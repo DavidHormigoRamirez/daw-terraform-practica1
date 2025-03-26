@@ -20,15 +20,17 @@ terraform {
       version = "5.91.0"
     }
   }
+  backend "s3" {
+    bucket = "terraform-backend-495923475593"
+    key = "practica1/key"
+    region = "us-east-1"
+    
+  }
 }
 
 provider "aws" {
   region = var.region
 }
-
-
-
-
 
 module "bastion" {
   source = "./modules/bastion"
