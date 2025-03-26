@@ -1,6 +1,6 @@
 # Grupo de seguridad para Web
 resource "aws_security_group" "web_access" {
-    name = "WEB-ANYWHERE"
+    name = "${terraform.workspace}-WEB-ANYWHERE"
     description = "HTTP and HTTPS access"
     ingress {
         from_port = 22
@@ -38,7 +38,7 @@ resource "aws_instance" "webserver" {
     associate_public_ip_address = true
     user_data = data.local_file.user_data_script.content
     tags = {
-      Name = "WebServer"
+      Name = "${terraform.workspace}-WebServer"
     }
   
 }

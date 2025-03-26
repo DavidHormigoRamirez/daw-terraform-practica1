@@ -1,17 +1,6 @@
-# Servidor Bastion
-resource "aws_instance" "bastion" {
-    security_groups = [ aws_security_group.ssh_access.name ]
-    ami = var.ami_id
-    instance_type = "t2.medium"
-    key_name = "vockey"
-    tags = {
-        Name = "Bastion"
-    }
-}
-
 # Grupo de seguridad para SSH
 resource "aws_security_group" "ssh_access" {
-    name = "SSH-ANYWHERE"
+    name = "${terraform.workspace}-SSH-ANYWHERE"
     description = "SSH Access"
     ingress  {
         from_port = 22
@@ -27,3 +16,16 @@ resource "aws_security_group" "ssh_access" {
     }
   
 }
+
+
+# Servidor Bastion
+resource "aws_instance" "bastion" {
+    security_groups = [ aws_security_group.ssh_access.name ]
+    ami = var.ami_id
+    instance_type = "t2.medium"
+    key_name = "vockey"
+    tags = {
+        Name = "${terraform.workspace}-Bastion"
+    }
+}
+
